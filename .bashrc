@@ -23,3 +23,4 @@ alias find='fd'
 alias cat='bat'
 alias rm='rm -I'
 
+eval "$(zoxide init bash)"
