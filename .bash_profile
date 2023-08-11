@@ -1,0 +1,6 @@
+#
+# ~/.bash_profile
+#
+
+~/.profile
+
