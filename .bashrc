@@ -6,6 +6,8 @@ export GTK_THEME=Adwaita:dark
 export GTK_RC_FILES=/usr/share/themes/Adwaita-dark/gtk-2.0/gtkrc
 export QT_STYLE_OVERRIDE=adwaita-dark
 
+export PATH=$PATH:~/.cargo/bin
+
 # If not running interactively, don't do anything
 [[ $- != *i* ]] && return
 
