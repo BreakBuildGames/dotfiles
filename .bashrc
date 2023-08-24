@@ -12,12 +12,10 @@ export PATH=$PATH:~/.cargo/bin
 [[ $- != *i* ]] && return
 
 
-alias ls='ls --color=auto'
-alias grep='grep --color=auto'
 PS1='[\u@\h \W]\$ '
 
-alias dotfiles='git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
 
+alias dotfiles='git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
 alias ls='lsd'
 alias cd='z'
 alias grep='rg'
