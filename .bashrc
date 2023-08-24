@@ -18,7 +18,7 @@ PS1='[\u@\h \W]\$ '
 
 alias dotfiles='git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
 
-alias ls='exa --icons -s=type'
+alias ls='lsd'
 alias cd='z'
 alias grep='rg'
 alias find='fd'
