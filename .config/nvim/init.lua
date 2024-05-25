@@ -25,6 +25,11 @@ require("lazy").setup({
             vim.cmd.colorscheme("catppuccin-mocha")
         end,
     },
+    {
+        "liuchengxu/vista.vim",
+        ft = { "rust", "markdown" },
+        event = { "BufReadPre", "BufNewFile" },
+    },
     { 
         "nvim-telescope/telescope.nvim",
         branch = "0.1.x",
@@ -71,14 +76,12 @@ require("lazy").setup({
           },
           snippet = {
             expand = function(args)
-                vim.fn["vsnip#anonymous"](args.body)
+                vim.snippet.expand(args.body)
             end,
           },
             mapping = {
             ["<S-Tab>"] = cmp.mapping.select_prev_item(),
-            ["<C-p>"] = cmp.mapping.select_prev_item(),
             ["<Tab>"] = cmp.mapping.select_next_item(),
-            ["<C-b>"] = cmp.mapping.select_next_item(),
             ["<C-b>"] = cmp.mapping.scroll_docs(-4),
             ["<C-f>"] = cmp.mapping.scroll_docs(4),
             ["<C-Space>"] = cmp.mapping.complete(),
@@ -122,7 +125,6 @@ require("lazy").setup({
         event = { "BufReadPre", "BufNewFile" },
         dependencies = {
             'hrsh7th/cmp-nvim-lsp',
-            'preservim/nerdcommenter',
         },
         config = function(_, opts)
             local capabilities = require("cmp_nvim_lsp").default_capabilities() 
@@ -138,7 +140,7 @@ require("lazy").setup({
                 underline = true,
                 severity_sort = true,
                 float = {
-                    focusable = false,
+                    focusable = true,
                     style = 'minimal',
                     border = 'rounded',
                     source = 'always',
@@ -155,26 +157,15 @@ require("lazy").setup({
                 })
             end
 
-
             sign({name = 'DiagnosticSignError', text = '✘'})
             sign({name = 'DiagnosticSignWarn', text = '▲'})
             sign({name = 'DiagnosticSignHint', text = '⚑'})
             sign({name = 'DiagnosticSignInfo', text = ''})
 
-            vim.keymap.set("n", "K", vim.lsp.buf.hover, {noremap = false })
-            vim.keymap.set("n", "gK", vim.diagnostic.open_float, { noremap = false })
-            vim.keymap.set("n", "ga", vim.lsp.buf.code_action, { noremap = false })
-            vim.keymap.set("n", "gr", vim.lsp.buf.rename, { noremap = false })
-            vim.keymap.set("n", "gi", vim.lsp.buf.implementation, { noremap = false })
-            vim.keymap.set("n", "g]", vim.lsp.buf.definition, { noremap = false })
-            vim.keymap.set("n", "g[", vim.lsp.buf.declaration, { noremap = false })
-
             vim.api.nvim_create_autocmd("BufWritePre", {
                 pattern={"*.rs"},
                 callback=function() vim.lsp.buf.format({async=false}) end,
             }) 
-
-
         end,
         opts = {
             servers = {
@@ -185,8 +176,27 @@ require("lazy").setup({
                             diagnostics = { enable = true },
                         },
                     },
+                    on_attach = function(bufnr) 
+                        vim.keymap.set("n", "K", vim.lsp.buf.hover, {noremap = false })
+                        vim.keymap.set("n", "gK", vim.diagnostic.open_float, { noremap = false })
+                        vim.keymap.set("n", "ga", vim.lsp.buf.code_action, { noremap = false })
+                        vim.keymap.set("n", "gr", vim.lsp.buf.rename, { noremap = false })
+                        vim.keymap.set("n", "gi", vim.lsp.buf.implementation, { noremap = false })
+                        vim.keymap.set("n", "g]", vim.lsp.buf.definition, { noremap = false })
+                        vim.keymap.set("n", "g[", vim.lsp.buf.declaration, { noremap = false })
+                        vim.keymap.set("n", "gs", vim.lsp.buf.workspace_symbol, { noremap = false })
+                        vim.keymap.set("n", "gh", function() 
+                            vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
+                        end, { noremap = false })
+                    end
                 },
                 marksman = {
+                    on_attach = function(bufnr) 
+                        vim.keymap.set("n", "g[", vim.lsp.buf.declaration, { noremap = false })
+                        vim.keymap.set("n", "g]", vim.lsp.buf.definition, { noremap = false })
+                        vim.keymap.set("n", "ga", vim.lsp.buf.code_action, { noremap = false })
+                        vim.keymap.set("n", "gs", vim.lsp.buf.workspace_symbol, { noremap = false })
+                    end
                 },
             },
         },
@@ -194,23 +204,19 @@ require("lazy").setup({
 })
 
 vim.cmd([[filetype plugin indent on]])
-vim.cmd([[filetype plugin on]])
+vim.cmd([[filetype plugin on]])                                                                                                                                         
 
 -- general settings 
-vim.opt.textwidth = 1000
+vim.opt.textwidth = 120
 vim.opt.tabstop = 4
 vim.opt.shiftwidth = 4
 vim.opt.expandtab = true
 vim.opt.cursorline = true
 vim.opt.title = true
 vim.opt.conceallevel = 3
-vim.opt.termguicolors = true
 vim.opt.clipboard:append { 'unnamedplus' }
 vim.opt.shada = ""  -- disable shada file. No need to keep commands/jump lists or buffers around 
 vim.opt.hlsearch = false  -- highlighting search is annoying
-
---makes gx open files in with their default programs 
-vim.g.netrw_browsex_viewer = "1"
 
 --DEBUGGER     
 vim.cmd([[packadd termdebug]])
@@ -239,21 +245,6 @@ vim.api.nvim_create_autocmd(
   command=[[nnoremap <buffer> <cr> <cr>:cclose<cr>]]})
 
 
---makes gx open files in with their default programs 
-vim.g.netrw_browsex_viewer = "-"
-
---some exceptions, because xdg-open only work with .desktop files 
-vim.cmd [[
-    function! NFH_png(f) 
-        cd %:h
-        execute '!swayimg' a:f
-    endfunction
-
-    function! NFH_jpg(f) 
-        cd %:h
-        execute '!swayimg' a:f
-    endfunction
-]]
 
 
 vim.cmd [[
