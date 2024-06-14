@@ -45,14 +45,15 @@ require("lazy").setup({
                         prompt_position = "bottom",
                         preview_height = 0.6, -- 60% of available lines
                     },
+                    prompt_prefix = " ",
                 },
             }
         end,
         keys = {
-            { "<leader>f", "<cmd>Telescope find_files prompt_prefix=🔍 <CR>", desc = "Find Files" },
+            { "<leader>f", "<cmd>Telescope find_files<CR>", desc = "Find Files" },
             { "<leader>d", "<cmd>Telescope diagnostics<CR>", desc = "Show Diagnostics" },
-            { "<leader>g", "<cmd>Telescope live_grep prompt_prefix=🔍<CR>", desc = "Live Grep" },
-            { "<leader>s", "<cmd>Telescope lsp_document_symbols prompt_prefix=🔍 ignore_symbols={'field','enummember','function'}<CR>", desc = "List Symbols" },
+            { "<leader>g", "<cmd>Telescope live_grep<CR>", desc = "Live Grep" },
+            { "<leader>s", "<cmd>Telescope lsp_document_symbols ignore_symbols={'field','enummember','function'}<CR>", desc = "List Symbols" },
         }
     },
     {
@@ -185,6 +186,7 @@ require("lazy").setup({
                         vim.keymap.set("n", "g]", vim.lsp.buf.definition, { noremap = false })
                         vim.keymap.set("n", "g[", vim.lsp.buf.declaration, { noremap = false })
                         vim.keymap.set("n", "gs", vim.lsp.buf.workspace_symbol, { noremap = false })
+                        vim.keymap.set("n", "<leader>t", ":Vista!!<CR>", { noremap = false })
                         vim.keymap.set("n", "gh", function() 
                             vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
                         end, { noremap = false })
@@ -192,8 +194,7 @@ require("lazy").setup({
                 },
                 marksman = {
                     on_attach = function(bufnr) 
-                        vim.keymap.set("n", "g[", vim.lsp.buf.declaration, { noremap = false })
-                        vim.keymap.set("n", "g]", vim.lsp.buf.definition, { noremap = false })
+                        vim.keymap.set("n", "gd", vim.lsp.buf.definition, { noremap = false })
                         vim.keymap.set("n", "ga", vim.lsp.buf.code_action, { noremap = false })
                         vim.keymap.set("n", "gs", vim.lsp.buf.workspace_symbol, { noremap = false })
                     end
