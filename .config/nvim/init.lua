@@ -26,6 +26,12 @@ require("lazy").setup({
         end,
     },
     {
+        "rebelot/kanagawa.nvim",
+        lazy = false,
+        priority = 1000,
+        opts = {},
+    },
+    {
         "liuchengxu/vista.vim",
         ft = { "rust", "markdown" },
         event = { "BufReadPre", "BufNewFile" },
@@ -51,8 +57,8 @@ require("lazy").setup({
         end,
         keys = {
             { "<leader>f", "<cmd>Telescope find_files<CR>", desc = "Find Files" },
-            { "<leader>d", "<cmd>Telescope diagnostics<CR>", desc = "Show Diagnostics" },
             { "<leader>g", "<cmd>Telescope live_grep<CR>", desc = "Live Grep" },
+            { "<leader>r", "<cmd>Telescope lsp_references<CR>", desc = "Find References" },
             { "<leader>s", "<cmd>Telescope lsp_document_symbols ignore_symbols={'field','enummember','function'}<CR>", desc = "List Symbols" },
         }
     },
@@ -63,10 +69,8 @@ require("lazy").setup({
             "hrsh7th/cmp-nvim-lsp",
             "hrsh7th/cmp-path",
             "hrsh7th/cmp-buffer",
-            "hrsh7th/vim-vsnip",
         },
         config = function(plugin, opts)
-          --vim.cmd([[set completeopt=menuone,noinsert,noselect]])
           vim.cmd([[set shortmess+=c]])
 
           local cmp = require("cmp")
@@ -94,7 +98,6 @@ require("lazy").setup({
              sources = {
                 { name = "nvim_lsp" },
                 { name = "buffer" },
-                { name = "vsnip" },
                 { name = "path" },
             },
           })
@@ -110,7 +113,7 @@ require("lazy").setup({
         "preservim/vim-markdown",
         ft = { "markdown" },
         name = "vim-markdown",
-        config = function(_, ots) 
+        config = function(_, ops) 
             vim.g.markdown_no_default_mappings = 1
         end,
     },
@@ -119,10 +122,20 @@ require("lazy").setup({
         ft = { "glsl" },
         name = "vim-glsl",
     },
+    {
+        "Canop/nvim-bacon",
+        ft = { "rust" },
+        name = "bacon",
+        config = function(_, ops)
+            vim.keymap.set("n", "dl", ":BaconList<CR>", {noremap = false })
+            vim.keymap.set("n", "dn", ":BaconLoad<CR>:w<CR>:BaconNext<CR>", {noremap = false })
+            vim.keymap.set("n", "dp", ":BaconLoad<CR>:w<CR>:BaconPrevious<CR>", {noremap = false })
+        end,
+    },
     --lsp
     {
         "neovim/nvim-lspconfig",
-        ft = { "rust", "markdown" },
+        ft = { "rust", "markdown", "wgsl" },
         event = { "BufReadPre", "BufNewFile" },
         dependencies = {
             'hrsh7th/cmp-nvim-lsp',
@@ -175,6 +188,7 @@ require("lazy").setup({
                         ["rust-analyzer"] = {
                             check = { command = "clippy"},
                             diagnostics = { enable = true },
+                            cargo = { allFeatures = true },
                         },
                     },
                     on_attach = function(bufnr) 
@@ -199,6 +213,8 @@ require("lazy").setup({
                         vim.keymap.set("n", "gs", vim.lsp.buf.workspace_symbol, { noremap = false })
                     end
                 },
+                wgsl_analyzer = {
+                }
             },
         },
     }
@@ -225,6 +241,11 @@ vim.cmd([[packadd termdebug]])
 --vertical split
 vim.g.termdebug_wide = 1
 
+-- buffer movement
+vim.keymap.set("n", "<leader>b", "<cmd>bnext<cr>", { noremap = false })
+vim.keymap.set("n", "<leader>p", "<cmd>bprev<cr>", { noremap = false })
+vim.keymap.set("n", "<leader><leader>", "<cmd>b#<CR>", { noremap = false })
+
 -- map it so that ESC will go to normal mode,
 -- even when TermDebug is active
 vim.keymap.set("t", "<Esc>", [[<C-\><C-n>]], {})
@@ -232,20 +253,13 @@ vim.keymap.set("t", "<Esc>", [[<C-\><C-n>]], {})
 -- center cursor after scrolling
 vim.keymap.set("n", "<C-d>", "<C-d>zz", { noremap = false })
 vim.keymap.set("n", "<C-u>", "<C-u>zz", { noremap = false })
+-- vim.keymap.set("v", "n", "", { noremap = false })
 
--- auto close quotes, brackets, etc
-vim.keymap.set("i", "(", "()<left>", { noremap = false })
-vim.keymap.set("i", "{", "{}<left>", { noremap = false })
-vim.keymap.set("i", "\"", "\"\"<left>", { noremap = false })
-vim.keymap.set("i", "[", "[]<left>", { noremap = false })
-
--- close quickfix menu after selecting choice
-vim.api.nvim_create_autocmd(
-  "filetype", {
-  pattern={"qf"},
-  command=[[nnoremap <buffer> <cr> <cr>:cclose<cr>]]})
-
-
+-- -- auto close quotes, brackets, etc
+-- vim.keymap.set("i", "(", "()<left>", { noremap = false })
+-- vim.keymap.set("i", "{", "{}<left>", { noremap = false })
+-- vim.keymap.set("i", "\"", "\"\"<left>", { noremap = false })
+-- vim.keymap.set("i", "[", "[]<left>", { noremap = false })
 
 
 vim.cmd [[
@@ -269,3 +283,13 @@ endfunction
 nnoremap <S-h> :call ToggleHiddenAll()<CR>
 ]]
 
+-- Auto-create parent directories (except for URIs "://").
+vim.api.nvim_create_autocmd({"BufWritePre", "FileWritePre"}, {
+  pattern = "*",
+  callback = function()
+    local file_path = vim.fn.expand("<afile>:p:h")
+    if not file_path:match("://") then
+      vim.fn.mkdir(file_path, "p")
+    end
+  end
+})
